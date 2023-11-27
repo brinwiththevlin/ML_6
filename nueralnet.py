@@ -4,7 +4,8 @@ from typing import Tuple, List
 
 class unitNN:
     def __init__(self, in_nodes, out_nodes=1):
-        self.weights = np.random.randn(in_nodes + 1, 1)
+        self.weights = np.random.randn(in_nodes + 1)
+        self.reset_weights = self.weights
 
     def activate(self, data: np.ndarray) -> bool:
         """activation function
@@ -14,15 +15,15 @@ class unitNN:
             bool: output of the NN
         """
         assert (
-            len(self.weights) == data.shape[1] + 1
+            len(self.weights) == data.shape[1]
         ), "number of inputs should mach initialized size."
-        data = np.c_[np.ones((len(data), 1)), data]
 
-        bool_np = np.matmul(data, self.weights) > 0
-        bool_np[bool_np == True] = 1
-        bool_np[bool_np == False] = 0
+        bool_np = (np.matmul(data, self.weights) > 0).flatten().astype(int)
 
         return bool_np
+
+    def reset(self):
+        self.weights = self.reset_weights
 
     def train(
         self, X: np.ndarray, Y: np.ndarray, style: str, lrate: float
@@ -43,10 +44,11 @@ class unitNN:
             "incremental",
         ], "training style must be batch or incremental."
 
+        self.reset()
         errors = []
         planes = []
         if style == "batch":
-            featureset = X
+            featureset = np.c_[np.ones((len(X), 1)), X]
             labels = Y
             for i in range(1, 101):
                 outputs = self.activate(featureset)
@@ -54,7 +56,7 @@ class unitNN:
                     2 / len(featureset) * featureset.T.dot(outputs - labels)
                 )
                 self.weights -= error_gradients * lrate
-                errors.append(sum(np.abs(output - labels)))
+                errors.append(sum(np.abs(outputs - labels)))
                 if i in [5, 10, 50, 100]:
                     planes.append(self.weights)
 
