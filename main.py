@@ -3,6 +3,7 @@ import nueralnet as NN
 import numpy as np
 
 if __name__ == "__main__":
+    np.random.seed(5280)
     X = (np.random.rand(200, 2) * 100) - 50
     Y = (X[:, 0] + 3 * X[:, 1] - 2 > 0).astype(int)
 
