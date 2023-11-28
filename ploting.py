@@ -3,8 +3,6 @@ import plotly.express as px
 import plotly.io as pio
 from typing import List
 
-pio.renderers.default = "browser"
-
 
 def plot_error(error_vect: List[float], style: str, lrate: float):
     """plots error curve over time (epochs) based on training style and learning rate
@@ -21,17 +19,18 @@ def plot_error(error_vect: List[float], style: str, lrate: float):
         title=f"absolute error against time ({style}, lrate={lrate})",
     )
     lrate_str = str(lrate)[2:]
-    fig.show()
-    # fig.write_image(f"pics/abs_error_{style}_{lrate_str}.png")
+    # fig.show()
+    fig.write_html(f"pics/abs_error_{style}_{lrate_str}.html")
 
 
-def plot_decision_planes(X, Y, planes, lrate):
+def plot_decision_planes(X, Y, planes, style, lrate):
     positive = X[Y == 1]
     negative = X[Y == 0]
     x_vals = [i / 2 for i in range(-100, 101)]
 
     for plane, t in enumerate([5, 10, 50, 100]):
         y_vals = _decision_line(planes[plane])
+        lrate_str = str(lrate)[2:]
 
         fig = go.Figure()
 
@@ -68,15 +67,14 @@ def plot_decision_planes(X, Y, planes, lrate):
         )
 
         fig.update_layout(
-            title="Decision Boundary Plot",
+            title=f"Decision Boundary Plot: {style} ({lrate}, epoch: {t})",
             xaxis=dict(title="X1"),
             yaxis=dict(title="X2"),
             showlegend=True,
         )
-        fig.show()
-        lrate_str = str(lrate)[2:]
+        # fig.show()
 
-        # fig.write_image(f"pics/decision_boundary_{lrate_str}.png")
+        fig.write_html(f"pics/decision_boundary_{style}_{lrate_str}_{t}.html")
 
 
 def _decision_line(weights):
