@@ -61,17 +61,19 @@ class unitNN:
                     planes.append(self.weights)
 
         else:
-            featureset = X
+            featureset = np.c_[np.ones((len(X), 1)), X]
             labels = Y
             for _ in range(1, 101):
+                step_error = 0
                 for i in range(len(featureset)):
                     xi = featureset[i : i + 1, :]
-                    yi = labels[i : i + 1, :]
+                    yi = labels[i : i + 1]
                     output = self.activate(xi)
                     error_gradient = xi.T.dot(output - yi)
                     self.weights -= error_gradient * lrate
-                    errors.append(sum(np.abs(output - labels)))
+                    step_error += sum(np.abs(output - yi))
                     if i in [5, 10, 50, 100]:
                         planes.append(self.weights)
+                errors.append(step_error)
 
         return errors, planes
