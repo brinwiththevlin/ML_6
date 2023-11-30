@@ -24,18 +24,6 @@ if __name__ == "__main__":
         print(f"total time spend on {style}: {end - start}")
 
     
-    #part2
-    
-    start =time.time()
-    lrate = .25
-    model = NN.unitNN(2,1)
-    errors, planes = model.train(X,Y,"batch", lrate)
-    print("plotting error")
-    plot.plot_error(errors, "batch", lrate)
-    print("plotting boundaries")
-    plot.plot_decision_planes(X, Y, planes, "batch", lrate)
-    end = time.time()
-    print(f"total time spend on batch with decaying rate : {end - start}")
 
 
     
