@@ -8,8 +8,9 @@ if __name__ == "__main__":
     X = (np.random.rand(200, 2) * 100) - 50
     Y = (X[:, 0] + 3 * X[:, 1] - 2 > 0).astype(int)
 
+    
     # part 1
-    for style in ["incremental", "batch"]:
+    for style in ["incremental", "batch", "batch-decaying-lrate"]:
         start = time.time()
         for lrate in [0.5, 0.25, 0.1, 1e-2, 1e-3, 1e-4]:
             print(f"style: {style}, lrate: {lrate}")
@@ -21,3 +22,20 @@ if __name__ == "__main__":
             plot.plot_decision_planes(X, Y, planes, style, lrate)
         end = time.time()
         print(f"total time spend on {style}: {end - start}")
+
+    
+    #part2
+    
+    start =time.time()
+    lrate = .25
+    model = NN.unitNN(2,1)
+    errors, planes = model.train(X,Y,"batch", lrate)
+    print("plotting error")
+    plot.plot_error(errors, "batch", lrate)
+    print("plotting boundaries")
+    plot.plot_decision_planes(X, Y, planes, "batch", lrate)
+    end = time.time()
+    print(f"total time spend on batch with decaying rate : {end - start}")
+
+
+    

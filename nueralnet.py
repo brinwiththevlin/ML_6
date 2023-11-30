@@ -1,5 +1,7 @@
 import numpy as np
+import random
 from typing import Tuple, List
+
 
 
 class unitNN:
@@ -26,8 +28,8 @@ class unitNN:
         self.weights = self.reset_weights
 
     def train(
-        self, X: np.ndarray, Y: np.ndarray, style: str, lrate: float
-    ) -> Tuple[List[int], List[Tuple[float, float]]]:
+        self, X: np.ndarray, Y: np.ndarray, style: str, lrate: float,
+    decay_lrate = False) -> Tuple[List[int], List[Tuple[float, float]]]:
         """trains the wieghs and biases on a dataset
 
         Args:
@@ -42,20 +44,27 @@ class unitNN:
         assert style in [
             "batch",
             "incremental",
+            "batch-decaying-lrate",
         ], "training style must be batch or incremental."
 
+        if style=="batch-decaying-lrate":
+            lrate_multiplier = random.uniform(0,1)
+        else:
+            lrate_multiplier = 1
+            
         self.reset()
         errors = []
         planes = []
-        if style == "batch":
+        if "batch" in style:
             featureset = np.c_[np.ones((len(X), 1)), X]
             labels = Y
             for i in range(1, 101):
+                lrate_multiplier *= lrate_multiplier
                 outputs = self.activate(featureset)
                 error_gradients = (
                     2 / len(featureset) * featureset.T.dot(outputs - labels)
                 )
-                self.weights -= error_gradients * lrate
+                self.weights -= error_gradients * (lrate* lrate_multiplier)
                 errors.append(sum(np.abs(outputs - labels)))
                 if i in [5, 10, 50, 100]:
                     planes.append(self.weights)
@@ -64,13 +73,14 @@ class unitNN:
             featureset = np.c_[np.ones((len(X), 1)), X]
             labels = Y
             for _ in range(1, 101):
+                lrate_multiplier *= lrate_multiplier
                 step_error = 0
                 for i in range(len(featureset)):
                     xi = featureset[i : i + 1, :]
                     yi = labels[i : i + 1]
                     output = self.activate(xi)
                     error_gradient = xi.T.dot(output - yi)
-                    self.weights -= error_gradient * lrate
+                    self.weights -= error_gradient * (lrate* lrate_multiplier)
                     step_error += sum(np.abs(output - yi))
                     if i in [5, 10, 50, 100]:
                         planes.append(self.weights)
