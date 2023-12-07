@@ -27,9 +27,37 @@ class unitNN:
     def reset(self):
         self.weights = self.reset_weights
 
+    def train_adapt_rates(self, X:np.ndarray, Y: np.ndarray, lrate:float):
+        self.reset()
+        errors = []
+        planes = []
+        t = 1
+        featureset = np.c_[np.ones((len(X), 1)), X]
+        labels = Y
+        
+        for i in range(1, 101):
+            prev_weights = self.weights
+            outputs = self.activate(featureset)
+            error_gradients = (
+                    2 / len(featureset) * featureset.T.dot(outputs - labels)
+                )
+            self.weights -= error_gradients * lrate
+            errors.append(sum(np.abs(outputs - labels)))
+            if i in [5, 10, 50, 100]:
+                planes.append(self.weights)
+            if i>1:
+                if (errors[i-1]-errors[i-2])>t:
+                    self.weights = prev_weights
+                    lrate *= .9
+                    
+                elif (errors[i-1] < errors[i-2]):
+                    lrate *= 1.1
+        return errors, planes
+                    
+
+        
     def train(
-        self, X: np.ndarray, Y: np.ndarray, style: str, lrate: float,
-    decay_lrate = False) -> Tuple[List[int], List[Tuple[float, float]]]:
+        self, X: np.ndarray, Y: np.ndarray, style: str, lrate: float) -> Tuple[List[int], List[Tuple[float, float]]]:
         """trains the wieghs and biases on a dataset
 
         Args:
